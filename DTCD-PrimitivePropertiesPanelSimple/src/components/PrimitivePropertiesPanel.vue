@@ -11,7 +11,13 @@
       <div class="panel-header">
         <div class="primitive-info">
           <input readonly type="text" tabindex="-1" class="node-id" :value="primitiveID" />
-          <input readonly type="text" tabindex="-1" class="node-title" :value="nodeTitle.replace( /(<([^>]+)>)/ig, '')" />
+          <input
+            readonly
+            type="text"
+            tabindex="-1"
+            class="node-title"
+            :value="nodeTitle.replace(/(<([^>]+)>)/gi, '')"
+          />
         </div>
       </div>
       <div class="properties-container">
@@ -51,23 +57,20 @@
               <select class="prop-type" v-model="prop.type">
                 <option
                   v-for="option in propertyTypes"
-                  :value="
-                    $root.dataSourceSystem.dataSourceTypes.includes(option) ? 'datasource' : option
-                  "
+                  :value="option"
                   :key="option"
                   v-text="option.toUpperCase()"
                 />
               </select>
-              <button
+              <!-- <button
                 v-if="prop.type === 'datasource'"
                 type="button"
                 class="otl-button"
                 @click="showModal(prop)"
               >
                 Edit {{ prop.expression.type }}
-              </button>
+              </button> -->
               <textarea
-                v-else
                 v-model="prop.expression"
                 rows="1"
                 class="prop-expression"
@@ -130,35 +133,41 @@
             </div>
           </div>
           <div v-for="port in portList" :key="port" class="property-card">
-          <div class="card-header">
-            <div class="prop-info">
-              <div class="prop-name" v-if="port.type !== 'OUT'">
-                <input readonly tabindex="-1" type="text" :value="port.primitiveName" />
-              </div>
-              <div class="prop-value">
-                <span
-                  v-if="port.properties.status.status === 'complete'"
-                  :title="port.properties.status.value"
-                  v-text="port.properties.status.value"
-                />
-                <span v-else>
-                  <StatusIcon v-if="port.properties.status.status === 'error'" :status="'error'" />
-                  <StatusIcon v-if="port.properties.status.status === 'inProgress'" :status="'inProgress'" />
-                </span>
+            <div class="card-header">
+              <div class="prop-info">
+                <div class="prop-name" v-if="port.type !== 'OUT'">
+                  <input readonly tabindex="-1" type="text" :value="port.primitiveName" />
+                </div>
+                <div class="prop-value">
+                  <span
+                    v-if="port.properties.status.status === 'complete'"
+                    :title="port.properties.status.value"
+                    v-text="port.properties.status.value"
+                  />
+                  <span v-else>
+                    <StatusIcon
+                      v-if="port.properties.status.status === 'error'"
+                      :status="'error'"
+                    />
+                    <StatusIcon
+                      v-if="port.properties.status.status === 'inProgress'"
+                      :status="'inProgress'"
+                    />
+                  </span>
+                </div>
               </div>
             </div>
+            <div v-if="port.type !== 'IN'" class="card-content">
+              <label>{{ port.primitiveName }}</label>
+              <textarea
+                v-model="port.properties.status.expression"
+                rows="1"
+                class="prop-expression"
+                placeholder="Enter expression"
+                @change="processPortProperty(port)"
+              />
+            </div>
           </div>
-          <div v-if="port.type !== 'IN'" class="card-content">
-            <label>{{port.primitiveName}}</label>
-            <textarea
-              v-model="port.properties.status.expression"
-              rows="1"
-              class="prop-expression"
-              placeholder="Enter expression"
-              @change="processPortProperty(port)"
-            />
-          </div>
-        </div>
         </div>
       </div>
     </div>
@@ -191,55 +200,44 @@ export default {
     editableOTL: null,
     primitiveProperties: {},
   }),
+
   mounted() {
-    this.propertyTypes.push(...this.$root.dataSourceSystem.dataSourceTypes);
-    this.logSystem.debug('Set types of DataSourceSystem');
-
-    this.logSystem.debug('BroadcastPrimitiveInfo event subscription');
-
-    let customAction;
-    customAction = this.eventSystem.createActionByCallback(
-      'showPropertiesInPanel',
-      this.guid,
-      this.processPrimitiveEvent.bind(this)
-    );
-    this.eventSystem.subscribe('BroadcastPrimitiveInfo', customAction.id);
-
-    customAction = this.eventSystem.createActionByCallback(
-      'clearPropertiesPanelByDelete',
-      this.guid,
-      this.processLivedashPrimitiveDeleteEvent.bind(this)
-    );
-    this.eventSystem.subscribe('DeleteLiveDashItem', customAction.id);
+    // console.log(Formio.Formio.createForm);
+    // this.propertyTypes.push(...this.$root.dataSourceSystem.dataSourceTypes);
+    // this.logSystem.debug('Set types of DataSourceSystem');
+    // this.eventSystem.subscribe('BroadcastPrimitiveInfo', customAction.id);
+    // this.eventSystem.subscribe('DeleteLiveDashItem', customAction.id);
   },
   methods: {
     processNodeProperty(propName, propExpression) {
       this.primitiveProperties[propName].expression = this.processExpressionString(propExpression);
     },
-    processPortProperty(port){
+    processPortProperty(port) {
       let portExpression = port.properties.status.expression;
-      this.primitivePorts.find(p => p.primitiveID === port.primitiveID).properties.status.expression = this.processExpressionString(portExpression);
+      this.primitivePorts.find(
+        p => p.primitiveID === port.primitiveID
+      ).properties.status.expression = this.processExpressionString(portExpression);
     },
-    processExpressionString(expression){
+    processExpressionString(expression) {
       expression = this.removeIds(expression);
 
       Object.keys(this.primitiveProperties).forEach(prop => {
         if (expression.includes(prop))
-          expression = expression.replaceAll(prop, `${this.primitiveID}.${prop}`)
-      })
+          expression = expression.replaceAll(prop, `${this.primitiveID}.${prop}`);
+      });
 
       this.primitivePorts.forEach(port => {
-         if (expression.includes(port.primitiveName))
-          expression = expression.replaceAll(port.primitiveName, `${port.primitiveID}.status`)
-      })
+        if (expression.includes(port.primitiveName))
+          expression = expression.replaceAll(port.primitiveName, `${port.primitiveID}.status`);
+      });
 
       return expression;
     },
     removeIds(expression) {
-      expression = expression.replaceAll(`${this.primitiveID}.`, ``)
+      expression = expression.replaceAll(`${this.primitiveID}.`, ``);
       this.primitivePorts.forEach(port => {
-        expression = expression.replaceAll(`${port.primitiveID}.status`, port.primitiveName)
-      })
+        expression = expression.replaceAll(`${port.primitiveID}.status`, port.primitiveName);
+      });
       return expression;
     },
     showModal(prop) {
@@ -262,15 +260,9 @@ export default {
     },
     processPrimitiveEvent(event = {}) {
       this.logSystem.debug(`Start propcessing event BroadcastPrimitiveInfo`);
-      const { name: eventName } = event;
-      let { primitiveTag: primitive = {}, ports } = event.args;
+      let { primitiveTag: primitive = {}, ports } = event;
       this.portList = JSON.parse(JSON.stringify(ports));
       this.primitivePorts = ports;
-
-      if (eventName !== 'BroadcastPrimitiveInfo') {
-        this.logSystem.error('Expected BroadcastPrimitiveInfo event');
-        return;
-      }
 
       const { primitiveID = '', nodeTitle = '', properties = {} } = primitive;
 
@@ -283,23 +275,23 @@ export default {
       this.nodeTitle = nodeTitle;
       this.propertyList = JSON.parse(JSON.stringify(properties));
       Object.keys(this.propertyList).forEach(prop => {
-        this.propertyList[prop].expression = this.removeIds(this.propertyList[prop].expression)
-      })
+        this.propertyList[prop].expression = this.removeIds(this.propertyList[prop].expression);
+      });
       this.portList.forEach(port => {
-        port.properties.status.expression = this.removeIds(port.properties.status.expression)
-      })
+        port.properties.status.expression = this.removeIds(port.properties.status.expression);
+      });
       this.newPropsCount = 1;
       this.addedPropertiesList = {};
 
       this.logSystem.debug(`End of propcessing event BroadcastPrimitiveInfo`);
     },
 
-    processLivedashPrimitiveDeleteEvent(event = {}) {
-      let { args } = event;
+    processLivedashPrimitiveDeleteEvent(eventData) {
+      const { text, tag } = eventData;
       // Check if label by nextline
-      if (args.text) this.nodeTitle = '';
+      if (text) this.nodeTitle = '';
 
-      if (args.tag && args.tag.primitiveID === this.primitiveID) {
+      if (tag && tag.primitiveID === this.primitiveID) {
         this.primitiveID = '';
         this.nodeTitle = '';
         this.newPropsCount = 1;
