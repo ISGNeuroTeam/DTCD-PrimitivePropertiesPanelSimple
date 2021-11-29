@@ -200,14 +200,6 @@ export default {
     editableOTL: null,
     primitiveProperties: {},
   }),
-
-  mounted() {
-    // console.log(Formio.Formio.createForm);
-    // this.propertyTypes.push(...this.$root.dataSourceSystem.dataSourceTypes);
-    // this.logSystem.debug('Set types of DataSourceSystem');
-    // this.eventSystem.subscribe('BroadcastPrimitiveInfo', customAction.id);
-    // this.eventSystem.subscribe('DeleteLiveDashItem', customAction.id);
-  },
   methods: {
     processNodeProperty(propName, propExpression) {
       this.primitiveProperties[propName].expression = this.processExpressionString(propExpression);
@@ -302,6 +294,7 @@ export default {
 
     deleteProperty(propName) {
       this.$delete(this.propertyList, propName);
+      this.$delete(this.primitiveProperties, propName);
       this.logSystem.debug(`Deleting property ${propName} from ${this.primitiveID} node`);
       this.logSystem.info(`Deleting property ${propName} from ${this.primitiveID} node`);
     },
@@ -368,6 +361,7 @@ export default {
 
       if (!existedProperties.includes(name.toLocaleLowerCase())) {
         await this.$set(this.propertyList, name, { value, type, status, expression });
+        await this.$set(this.primitiveProperties, name, { value, type, status, expression });
         this.logSystem.debug(`Adding property ${name} from ${this.primitiveID} node`);
         this.logSystem.info(`Adding property ${name} from ${this.primitiveID} node`);
 
