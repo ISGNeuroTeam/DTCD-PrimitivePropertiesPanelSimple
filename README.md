@@ -1,6 +1,6 @@
 # DTCD-PrimitivePropertiesPanelSimple
 
-Simple default menu panel plugin for [DTCD](https://github.com/ISGNeuroTeam/DTCD) application.
+Panel for changing properties of primitves in [DTCD-LiveDashPanel](https://github.com/ISGNeuroTeam/DTCD-LiveDashPanel) of [DTCD](https://github.com/ISGNeuroTeam/DTCD) application for "FGK".
 
 ## Getting Started
 
