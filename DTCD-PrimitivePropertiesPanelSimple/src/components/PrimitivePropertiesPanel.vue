@@ -75,7 +75,6 @@
                 rows="1"
                 class="prop-expression"
                 placeholder="Enter expression"
-                @change="processNodeProperty(propName, prop.expression)"
               />
             </div>
           </div>
@@ -164,7 +163,6 @@
                 rows="1"
                 class="prop-expression"
                 placeholder="Enter expression"
-                @change="processPortProperty(port)"
               />
             </div>
           </div>
