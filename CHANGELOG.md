@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [UNDRELEASED]
 
+### Added
+
+- version of core systems for adapters
+
 ## Changed
 
 - Removed replaces of ports id
+- build process in order to make directory name with current version of plugin
 
 ## [0.1.2]
 
