@@ -220,7 +220,7 @@ export default {
     processPrimitiveEvent(event = {}) {
       this.logSystem.debug(`Start propcessing event BroadcastPrimitiveInfo`);
       let { primitiveTag: primitive = {}, ports } = event;
-      this.portList = ports
+      this.portList = ports;
       this.primitivePorts = ports;
 
       const { primitiveID = '', nodeTitle = '', properties = {} } = primitive;
@@ -232,7 +232,7 @@ export default {
       this.primitiveProperties = properties;
       this.primitiveID = primitiveID;
       this.nodeTitle = nodeTitle;
-      this.propertyList = properties
+      this.propertyList = properties;
       this.newPropsCount = 1;
       this.addedPropertiesList = {};
 
