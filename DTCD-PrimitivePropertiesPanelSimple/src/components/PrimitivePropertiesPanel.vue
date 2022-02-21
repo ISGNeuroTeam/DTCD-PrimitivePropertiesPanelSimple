@@ -75,7 +75,6 @@
                 rows="1"
                 class="prop-expression"
                 placeholder="Enter expression"
-                @change="processNodeProperty(propName, prop.expression)"
               />
             </div>
           </div>
@@ -164,7 +163,6 @@
                 rows="1"
                 class="prop-expression"
                 placeholder="Enter expression"
-                @change="processPortProperty(port)"
               />
             </div>
           </div>
@@ -201,37 +199,6 @@ export default {
     primitiveProperties: {},
   }),
   methods: {
-    processNodeProperty(propName, propExpression) {
-      this.primitiveProperties[propName].expression = this.processExpressionString(propExpression);
-    },
-    processPortProperty(port) {
-      let portExpression = port.properties.status.expression;
-      this.primitivePorts.find(
-        p => p.primitiveID === port.primitiveID
-      ).properties.status.expression = this.processExpressionString(portExpression);
-    },
-    processExpressionString(expression) {
-      expression = this.removeIds(expression);
-
-      Object.keys(this.primitiveProperties).forEach(prop => {
-        if (expression.includes(prop))
-          expression = expression.replaceAll(prop, `${this.primitiveID}.${prop}`);
-      });
-
-      this.primitivePorts.forEach(port => {
-        if (expression.includes(port.primitiveName))
-          expression = expression.replaceAll(port.primitiveName, `${port.primitiveID}.status`);
-      });
-
-      return expression;
-    },
-    removeIds(expression) {
-      expression = expression.replaceAll(`${this.primitiveID}.`, ``);
-      this.primitivePorts.forEach(port => {
-        expression = expression.replaceAll(`${port.primitiveID}.status`, port.primitiveName);
-      });
-      return expression;
-    },
     showModal(prop) {
       if (typeof prop.expression !== 'string') {
         this.tempValue = prop.expression;
@@ -253,7 +220,7 @@ export default {
     processPrimitiveEvent(event = {}) {
       this.logSystem.debug(`Start propcessing event BroadcastPrimitiveInfo`);
       let { primitiveTag: primitive = {}, ports } = event;
-      this.portList = JSON.parse(JSON.stringify(ports));
+      this.portList = ports;
       this.primitivePorts = ports;
 
       const { primitiveID = '', nodeTitle = '', properties = {} } = primitive;
@@ -265,13 +232,7 @@ export default {
       this.primitiveProperties = properties;
       this.primitiveID = primitiveID;
       this.nodeTitle = nodeTitle;
-      this.propertyList = JSON.parse(JSON.stringify(properties));
-      Object.keys(this.propertyList).forEach(prop => {
-        this.propertyList[prop].expression = this.removeIds(this.propertyList[prop].expression);
-      });
-      this.portList.forEach(port => {
-        port.properties.status.expression = this.removeIds(port.properties.status.expression);
-      });
+      this.propertyList = properties;
       this.newPropsCount = 1;
       this.addedPropertiesList = {};
 
