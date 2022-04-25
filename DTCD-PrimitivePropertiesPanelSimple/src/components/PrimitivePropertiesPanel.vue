@@ -27,7 +27,15 @@
               <p>{{ primitiveID }} properties:</p>
             </div>
             <div class="btn add-prop-btn" title="Add property" @click="addNewPropertyForm">
-              <i class="fas fa-plus icon" />
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M13 13V19H11V13H5V11H11V5H13V11H19V13H13Z" />
+              </svg>
             </div>
           </div>
           <div v-for="(prop, propName) in propertyList" :key="propName" class="property-card">
@@ -38,7 +46,7 @@
                   <input readonly tabindex="-1" type="text" :value="propName" />
                 </div>
                 <div class="prop-value">
-                  <span v-if="prop.status === 'complete'" :title="prop.value" v-text="prop.value" />
+                  <span v-if="prop.status === 'complete'" v-text="prop.value" />
                   <span v-else>
                     <StatusIcon v-if="prop.status === 'error'" :status="'error'" />
                     <StatusIcon v-if="prop.status === 'inProgress'" :status="'inProgress'" />
@@ -50,27 +58,34 @@
                 title="Delete property"
                 @click="deleteProperty(propName)"
               >
-                <i class="far fa-trash-alt icon" />
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                  <path
+                    d="M17 22H7C5.89543 22 5 21.1046 5 20V7H3V5H7V4C7 2.89543 7.89543 2 9 2H15C16.1046 2 17 2.89543 17 4V5H21V7H19V20C19 21.1046 18.1046 22 17 22ZM7 7V20H17V7H7ZM9 4V5H15V4H9ZM15 18H13V9H15V18ZM11 18H9V9H11V18Z"
+                  />
+                </svg>
               </div>
             </div>
             <div class="card-content">
               <select class="prop-type" v-model="prop.type">
                 <option
                   v-for="option in propertyTypes"
-                  :value="option"
+                  :value="
+                    $root.dataSourceSystem.dataSourceTypes.includes(option) ? 'datasource' : option
+                  "
                   :key="option"
                   v-text="option.toUpperCase()"
                 />
               </select>
-              <!-- <button
+              <button
                 v-if="prop.type === 'datasource'"
                 type="button"
                 class="otl-button"
                 @click="showModal(prop)"
               >
                 Edit {{ prop.expression.type }}
-              </button> -->
+              </button>
               <textarea
+                v-else
                 v-model="prop.expression"
                 rows="1"
                 class="prop-expression"
@@ -102,7 +117,11 @@
                     title="Add property"
                     @click="addPropertyToPrimitive(propName)"
                   >
-                    <i class="fas fa-check icon" />
+                    <svg width="24" height="24" viewBox="0 0 24 24">
+                      <path
+                        d="M20.8388 6.69461L8.81799 18.7154L3.16113 13.0586L4.57113 11.6486L8.81799 15.8854L19.4288 5.28461L20.8388 6.69461Z"
+                      />
+                    </svg>
                   </div>
                 </div>
               </div>
@@ -111,7 +130,11 @@
                 title="Delete property"
                 @click="deleteAddedProperty(propName)"
               >
-                <i class="far fa-trash-alt icon" />
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                  <path
+                    d="M17 22H7C5.89543 22 5 21.1046 5 20V7H3V5H7V4C7 2.89543 7.89543 2 9 2H15C16.1046 2 17 2.89543 17 4V5H21V7H19V20C19 21.1046 18.1046 22 17 22ZM7 7V20H17V7H7ZM9 4V5H15V4H9ZM15 18H13V9H15V18ZM11 18H9V9H11V18Z"
+                  />
+                </svg>
               </div>
             </div>
             <div class="card-content">
@@ -140,7 +163,6 @@
                 <div class="prop-value">
                   <span
                     v-if="port.properties.status.status === 'complete'"
-                    :title="port.properties.status.value"
                     v-text="port.properties.status.value"
                   />
                   <span v-else>
@@ -188,7 +210,7 @@ export default {
     nodeTitle: '',
     propertyList: {},
     propertyStatusList: {},
-    propertyTypes: ['expression'],
+    propertyTypes: ['expression', 'OTL'],
     newPropsCount: 1,
     addedPropertiesList: {},
     addedPortPropertiesList: {},
@@ -374,22 +396,24 @@ $c-green: #4caf50;
     .icon {
       color: #757575;
       font-size: 15px;
-      transition: $transition-time;
     }
 
     &.add-prop-btn {
       border-color: $c-blue;
 
-      .icon {
-        color: $c-blue;
+      path {
+        fill: $c-blue;
       }
 
       &:hover {
         background-color: $c-blue;
 
-        .icon {
-          color: #fff;
+        svg {
           transform: rotate(180deg);
+        }
+
+        path {
+          fill: #fff;
         }
       }
     }
@@ -398,15 +422,15 @@ $c-green: #4caf50;
       flex-shrink: 0;
       border-color: $c-red;
 
-      .icon {
-        color: $c-red;
+      path {
+        fill: $c-red;
       }
 
       &:hover {
         background-color: $c-red;
 
-        .icon {
-          color: #fff;
+        path {
+          fill: #fff;
         }
       }
     }
@@ -414,15 +438,15 @@ $c-green: #4caf50;
     &.confirm-add-prop-btn {
       border-color: $c-green;
 
-      .icon {
-        color: $c-green;
+      path {
+        fill: $c-green;
       }
 
       &:hover {
         background-color: $c-green;
 
-        .icon {
-          color: #fff;
+        path {
+          fill: #fff;
         }
       }
     }
@@ -431,8 +455,8 @@ $c-green: #4caf50;
       pointer-events: none;
       border-color: #959595;
 
-      .icon {
-        color: #959595;
+      path {
+        fill: #959595;
       }
     }
   }
@@ -495,7 +519,7 @@ $c-green: #4caf50;
     .property-card {
       display: flex;
       flex-direction: column;
-      padding: 0 20px;
+      padding: 7px 20px;
 
       .card-header {
         display: flex;
@@ -526,11 +550,15 @@ $c-green: #4caf50;
           }
 
           .prop-value {
-            display: flex;
-            justify-content: flex-end;
-            flex: 1 0;
             font-size: 15px;
             padding: 0 20px;
+            margin-left: auto;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 5; /* number of lines to show */
+            line-clamp: 5;
+            -webkit-box-orient: vertical;
           }
         }
       }

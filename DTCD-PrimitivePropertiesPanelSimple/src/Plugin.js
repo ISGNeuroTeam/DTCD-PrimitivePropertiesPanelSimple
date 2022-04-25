@@ -26,10 +26,10 @@ export class Plugin extends PanelPlugin {
     const eventSystem = new EventSystemAdapter('0.4.0', guid);
     logSystem.debug(`Create EventSystemAdapter instance in ${pluginMeta.name} plugin`);
     eventSystem.registerPluginInstance(this, []);
-    // const dataSourceSystem = new DataSourceSystemAdapter();
-    // logSystem.debug(`Create DataSourceSystemAdapter instance in ${pluginMeta.name} plugin`);
+    const dataSourceSystem = new DataSourceSystemAdapter('0.2.0');
+    logSystem.debug(`Create DataSourceSystemAdapter instance in ${pluginMeta.name} plugin`);
 
-    const data = { guid, logSystem, eventSystem };
+    const data = { guid, logSystem, eventSystem, dataSourceSystem };
 
     logSystem.debug(`Creating Vue instance in ${pluginMeta.name} plugin`);
     this.vue = new VueJS.default({
