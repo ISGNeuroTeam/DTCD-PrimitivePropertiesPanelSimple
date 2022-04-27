@@ -157,7 +157,7 @@
           <div v-for="port in portList" :key="port" class="property-card">
             <div class="card-header">
               <div class="prop-info">
-                <div class="prop-name" v-if="port.type !== 'OUT'">
+                <div class="prop-name">
                   <input readonly tabindex="-1" type="text" :value="port.primitiveName" />
                 </div>
                 <div class="prop-value">
@@ -178,9 +178,28 @@
                 </div>
               </div>
             </div>
-            <div v-if="port.type !== 'IN'" class="card-content">
-              <label>{{ port.primitiveName }}</label>
+            <div class="card-content">
+              <!-- <label>{{ port.primitiveName }}</label> -->
+              <select class="prop-type" v-model="port.properties.status.type">
+                <option
+                  v-for="option in propertyTypes"
+                  :value="
+                    $root.dataSourceSystem.dataSourceTypes.includes(option) ? 'datasource' : option
+                  "
+                  :key="option"
+                  v-text="option.toUpperCase()"
+                />
+              </select>
+              <button
+                v-if="port.properties.status.type === 'datasource'"
+                type="button"
+                class="otl-button"
+                @click="showModal(port.properties.status)"
+              >
+                Edit OTL
+              </button>
               <textarea
+                v-else
                 v-model="port.properties.status.expression"
                 rows="1"
                 class="prop-expression"
@@ -550,6 +569,7 @@ $c-green: #4caf50;
           }
 
           .prop-value {
+            max-width: 70%;
             font-size: 15px;
             padding: 0 20px;
             margin-left: auto;
